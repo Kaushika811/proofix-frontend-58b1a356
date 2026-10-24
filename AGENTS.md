@@ -8,3 +8,7 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+## Project rules
+- App code in `src/` and `Landing/` was imported unchanged from github.com/Kaushika811/proofix-frontend (`frontend/`); keep it faithful to that repo unless the user asks for changes.
+- `vite.config.ts` stays on `@lovable.dev/vite-tanstack-config` (the repo's plain Vite config with a backend proxy is not used) so the Lovable preview can run it.
