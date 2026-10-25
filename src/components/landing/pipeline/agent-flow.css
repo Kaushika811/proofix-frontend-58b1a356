@@ -28,7 +28,7 @@
   gap: 10px;
 }
 .aflow-legend li > span {
-  color: #ffffff2e;
+  color: #ffffff4d;
 }
 .aflow-legend button {
   padding: 2px 0;
@@ -274,7 +274,7 @@
   grid-row: 1;
   position: relative;
   min-width: 0;
-  padding: 2px 0 12px 12px;
+  padding: 2px 0 6px 12px;
 }
 .aflow-card::before {
   content: '';
@@ -452,7 +452,7 @@
   .aflow-row[data-side='left'] .aflow-card {
     grid-column: 1;
     justify-self: end;
-    padding: 2px 12px 12px 0;
+    padding: 2px 12px 6px 0;
     text-align: right;
   }
   .aflow-row[data-side='left'] .aflow-card::before {
