@@ -159,32 +159,7 @@ export function Pipeline() {
             The four moments summarize the workflow. These agents handle its
             individual responsibilities.
           </p>
-          <ol className="architecture-agents" data-has-active={activeAgent !== null}>
-            {stages.map((stage, i) => {
-              const parent = moments.findIndex((m) => m.agents.includes(i))
-              return (
-                <li
-                  key={stage.n}
-                  id={`agent-${stage.n}`}
-                  data-agent={stage.n}
-                  data-parent-moment={parent + 1}
-                  className="architecture-agent"
-                  aria-current={
-                    activeAgent === `agent-${stage.n}` ? 'step' : undefined
-                  }
-                >
-                  <span className="architecture-agent-number">{stage.n}</span>
-                  <div>
-                    <strong>{stage.name}</strong>
-                    <p>{stage.does.join(' → ')}</p>
-                  </div>
-                  <a href={`#moment-${parent + 1}`}>
-                    View {moments[parent].title.toLowerCase()} ↗
-                  </a>
-                </li>
-              )
-            })}
-          </ol>
+          <AgentFlow />
         </details>
       </section>
     </>
