@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react'
+import { Fragment, useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { stages } from './stageData'
 import './agent-flow.css'
 
@@ -183,7 +183,7 @@ export function AgentFlow() {
             <button
               type="button"
               data-state={stateOf(pi, activePhase)}
-              onClick={() => select(indexOf(phase.agents[0]), 'jump')}
+              onClick={() => goTo(indexOf(phase.agents[0]))}
             >
               {phase.title}
             </button>
@@ -227,7 +227,7 @@ export function AgentFlow() {
                     data-side={i % 2 === 0 ? 'right' : 'left'}
                     data-state={state}
                   >
-                    <span className="aflow-spine" aria-hidden="true" onClick={() => select(i, 'click')}>
+                    <span className="aflow-spine" aria-hidden="true" onClick={() => choose(i)}>
                       <span
                         className="aflow-node"
                         ref={(el) => {
@@ -250,7 +250,7 @@ export function AgentFlow() {
                         type="button"
                         aria-expanded={active}
                         aria-controls={`aflow-detail-${n}`}
-                        onClick={() => select(i, 'click')}
+                        onClick={() => choose(i)}
                         onKeyDown={(e) => onKey(e, i)}
                       >
                         <span className="aflow-name">
@@ -259,7 +259,14 @@ export function AgentFlow() {
                         </span>
                         <span className="aflow-tagline">{taglines[n]}</span>
                       </button>
-                      <div className="aflow-reveal" id={`aflow-detail-${n}`} inert={!active}>
+                      <div
+                        className="aflow-reveal"
+                        id={`aflow-detail-${n}`}
+                        inert={!active}
+                        ref={(el) => {
+                          reveals.current[i] = el
+                        }}
+                      >
                         <div>
                           <div className="aflow-detail">
                             <p className="aflow-desc">{stage.desc}</p>
