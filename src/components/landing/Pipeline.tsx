@@ -5,7 +5,7 @@ import { PatchChallenge } from './pipeline/PatchChallenge'
 import { RepairScope } from './pipeline/RepairScope'
 import { FailureTrace } from './pipeline/FailureTrace'
 import { StageVisual } from './pipeline/StageVisual'
-import { stages } from './pipeline/stageData'
+import { AgentFlow } from './pipeline/AgentFlow'
 import { useReducedMotionPreference } from '@/components/landing/hooks/useReducedMotionPreference'
 import './pipeline/repair-story.css'
 
@@ -99,7 +99,7 @@ function Moment({ index, active, track }: { index: number; active: boolean; trac
 }
 
 export function Pipeline() {
-  const { activeMoment, activeAgent, scrolling } = usePageScrollState()
+  const { activeMoment, scrolling } = usePageScrollState()
   const tracks = useMemo(() => moments.map(() => createRef<HTMLDivElement>()), [])
   const reduced = useReducedMotionPreference()
   const shown = activeMoment ? Number(activeMoment.replace('moment-', '')) - 1 : 0
