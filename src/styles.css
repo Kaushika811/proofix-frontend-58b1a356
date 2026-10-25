@@ -482,3 +482,13 @@
     scroll-behavior: auto !important;
   }
 }
+
+::selection {
+  background-color: var(--status-running);
+  color: #fafafa;
+}
+
+.landing-page ::selection {
+  background-color: var(--brand);
+  color: var(--background);
+}

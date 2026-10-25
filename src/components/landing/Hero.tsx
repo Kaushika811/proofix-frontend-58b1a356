@@ -30,7 +30,8 @@ export function Hero() {
           </div>
 
           {/* Title */}
-          <h1 className="font-display leading-[0.9] tracking-tighter text-[clamp(3.5rem,10vw,9rem)] text-foreground">
+          <h1 className="font-display leading-[0.9] tracking-tighter text-[clamp(2.75rem,8vw,4.5rem)] text-foreground">
+            <span className="block mb-4">ProoFix</span>
             <span className="block">Evidence</span>
             <span className="block">before merge.</span>
           </h1>
