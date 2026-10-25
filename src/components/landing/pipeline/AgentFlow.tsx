@@ -1,4 +1,4 @@
-import { Fragment, useRef, useState, type KeyboardEvent } from 'react'
+import { Fragment, useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { stages } from './stageData'
 import './agent-flow.css'
 
@@ -167,7 +167,7 @@ export function AgentFlow() {
             <button
               type="button"
               data-state={stateOf(pi, activePhase)}
-              onClick={() => select(indexOf(phase.agents[0]))}
+              onClick={() => select(indexOf(phase.agents[0]), 'jump')}
             >
               {phase.title}
             </button>
@@ -176,7 +176,7 @@ export function AgentFlow() {
         ))}
       </ol>
 
-      <div className="aflow-track">
+      <div className="aflow-track" ref={track}>
         <span className="aflow-pulse" aria-hidden="true">
           <span />
         </span>
@@ -211,8 +211,20 @@ export function AgentFlow() {
                     data-side={i % 2 === 0 ? 'right' : 'left'}
                     data-state={state}
                   >
-                    <span className="aflow-spine" aria-hidden="true" onClick={() => select(i)}>
-                      <span className="aflow-node">{n}</span>
+                    <span className="aflow-spine" aria-hidden="true" onClick={() => select(i, 'click')}>
+                      <span
+                        className="aflow-node"
+                        ref={(el) => {
+                          nodes.current[i] = el
+                        }}
+                      >
+                        {n}
+                        {active && (
+                          <svg className="aflow-ring" viewBox="0 0 36 36">
+                            <circle cx="18" cy="18" r="17" pathLength={100} />
+                          </svg>
+                        )}
+                      </span>
                     </span>
                     <div className="aflow-card">
                       <button
@@ -222,7 +234,7 @@ export function AgentFlow() {
                         type="button"
                         aria-expanded={active}
                         aria-controls={`aflow-detail-${n}`}
-                        onClick={() => select(i)}
+                        onClick={() => select(i, 'click')}
                         onKeyDown={(e) => onKey(e, i)}
                       >
                         <span className="aflow-name">

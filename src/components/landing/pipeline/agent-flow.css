@@ -6,6 +6,8 @@
   --aflow-sky: #7dd3fc;
   --aflow-surface: hsl(0 0% 6%);
   margin-top: 24px;
+  /* Scroll position is compensated in JS when panels open/close; keep native anchoring out. */
+  overflow-anchor: none;
 }
 
 /* Phase legend: Issue → Investigation → … → Trust */
@@ -207,6 +209,30 @@
       0 0 0 7px #7dd3fc08;
   }
 }
+/* Progress ring drawn around the node each time it becomes active. */
+.aflow-ring {
+  position: absolute;
+  inset: -6px;
+  width: 36px;
+  height: 36px;
+  transform: rotate(-90deg);
+  pointer-events: none;
+  overflow: visible;
+}
+.aflow-ring circle {
+  fill: none;
+  stroke: #7dd3fc;
+  stroke-width: 1.25;
+  stroke-linecap: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: aflow-ring-draw 0.9s cubic-bezier(0.3, 0.7, 0.3, 1) forwards;
+}
+@keyframes aflow-ring-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
 .aflow-diamond {
   position: absolute;
   top: 15px;
@@ -343,10 +369,23 @@
 }
 
 /* Reveal */
+/* Height switches instantly (scroll position is compensated in JS); content fades in. */
 .aflow-reveal {
   display: grid;
   grid-template-rows: 0fr;
-  transition: grid-template-rows 0.35s ease;
+}
+.aflow-row[data-state='active'] .aflow-detail {
+  animation: aflow-detail-in 0.4s ease-out;
+}
+@keyframes aflow-detail-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 .aflow-row[data-state='active'] .aflow-reveal {
   grid-template-rows: 1fr;
@@ -503,8 +542,13 @@
   .aflow-pulse {
     display: none;
   }
-  .aflow-row[data-state='active'] .aflow-node {
+  .aflow-row[data-state='active'] .aflow-node,
+  .aflow-row[data-state='active'] .aflow-detail {
     animation: none;
+  }
+  .aflow-ring circle {
+    animation: none;
+    stroke-dashoffset: 0;
   }
   .aflow-reveal,
   .aflow-spine::before,
