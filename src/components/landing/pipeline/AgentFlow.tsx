@@ -42,16 +42,107 @@ const indexOf = (n: string) => stages.findIndex((s) => s.n === n)
 const stateOf = (i: number, current: number) =>
   i < current ? 'done' : i === current ? 'active' : 'upcoming'
 
+/**
+ * How a selection was made:
+ * - scroll: the node closest to the viewport centre (keeps it in place while panels open/close)
+ * - click / key: manual choice; scroll-driven selection pauses until the user scrolls on
+ * - jump: phase legend; brings the agent to the centre of the screen
+ * - reset: the box was just opened, so the first agent is shown
+ */
+type SelectMode = 'scroll' | 'click' | 'key' | 'jump' | 'reset'
+
+/** Scroll distance after a manual choice before scrolling takes over again. */
+const MANUAL_HOLD_PX = 40
+
 export function AgentFlow() {
   const [selected, setSelected] = useState(0)
+  const selectedRef = useRef(0)
+  const root = useRef<HTMLDivElement>(null)
+  const track = useRef<HTMLDivElement>(null)
   const buttons = useRef<(HTMLButtonElement | null)[]>([])
+  const nodes = useRef<(HTMLSpanElement | null)[]>([])
+  const pending = useRef<{ mode: SelectMode; el: HTMLElement | null; top: number } | null>(null)
+  const holdY = useRef<number | null>(null)
   const activePhase = flowPhases.findIndex((p) => p.agents.includes(stages[selected].n))
 
-  const select = (i: number, focus = false) => {
-    const next = Math.max(0, Math.min(stages.length - 1, i))
-    setSelected(next)
-    if (focus) buttons.current[next]?.focus()
+  const applyPending = () => {
+    const p = pending.current
+    pending.current = null
+    if (!p) return
+    const el = p.el
+    if (el && (p.mode === 'scroll' || p.mode === 'click' || p.mode === 'key')) {
+      // Panels above the agent opened or closed: keep the agent where the reader is looking.
+      const drift = el.getBoundingClientRect().top - p.top
+      if (Math.abs(drift) > 0.5) window.scrollTo({ top: window.scrollY + drift, behavior: 'instant' })
+    }
+    if (el && p.mode === 'key') el.scrollIntoView({ block: 'nearest', behavior: 'instant' })
+    if (el && p.mode === 'jump') el.scrollIntoView({ block: 'center', behavior: 'instant' })
+    if (p.mode !== 'scroll') holdY.current = window.scrollY
   }
+
+  const select = (i: number, mode: SelectMode) => {
+    const next = Math.max(0, Math.min(stages.length - 1, i))
+    const el = nodes.current[next]
+    pending.current = { mode, el, top: el?.getBoundingClientRect().top ?? 0 }
+    const changed = next !== selectedRef.current
+    selectedRef.current = next
+    if (changed) setSelected(next)
+    else applyPending()
+    if (mode === 'key') buttons.current[next]?.focus({ preventScroll: true })
+  }
+
+  useLayoutEffect(() => {
+    applyPending()
+  }, [selected])
+
+  // Scroll-driven selection: the agent closest to the middle of the screen is the active one.
+  useEffect(() => {
+    const details = root.current?.closest('details') ?? null
+    let frame = 0
+
+    const evaluate = () => {
+      frame = 0
+      if (details && !details.open) return
+      if (holdY.current !== null) {
+        if (Math.abs(window.scrollY - holdY.current) < MANUAL_HOLD_PX) return
+        holdY.current = null
+      }
+      const box = track.current?.getBoundingClientRect()
+      if (!box || box.bottom < 0 || box.top > window.innerHeight) return
+      const middle = window.innerHeight / 2
+      let best = -1
+      let bestDistance = Infinity
+      nodes.current.forEach((node, i) => {
+        if (!node) return
+        const r = node.getBoundingClientRect()
+        const distance = Math.abs(r.top + r.height / 2 - middle)
+        if (distance < bestDistance) {
+          bestDistance = distance
+          best = i
+        }
+      })
+      if (best >= 0 && best !== selectedRef.current) select(best, 'scroll')
+    }
+
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(evaluate)
+    }
+    const onToggle = () => {
+      if (details?.open) select(0, 'reset')
+    }
+
+    window.addEventListener('scroll', schedule, { passive: true })
+    window.addEventListener('resize', schedule)
+    details?.addEventListener('toggle', onToggle)
+    return () => {
+      if (frame) cancelAnimationFrame(frame)
+      window.removeEventListener('scroll', schedule)
+      window.removeEventListener('resize', schedule)
+      details?.removeEventListener('toggle', onToggle)
+    }
+    // select only touches refs and state setters, so the first-render version stays valid.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const onKey = (e: KeyboardEvent<HTMLButtonElement>, i: number) => {
     const moves: Record<string, number> = {
@@ -64,12 +155,12 @@ export function AgentFlow() {
     }
     if (e.key in moves) {
       e.preventDefault()
-      select(moves[e.key], true)
+      select(moves[e.key], 'key')
     }
   }
 
   return (
-    <div className="aflow">
+    <div className="aflow" ref={root}>
       <ol className="aflow-legend" aria-label="Pipeline phases">
         {flowPhases.map((phase, pi) => (
           <li key={phase.title}>
