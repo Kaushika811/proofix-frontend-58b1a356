@@ -42,17 +42,27 @@ const indexOf = (n: string) => stages.findIndex((s) => s.n === n)
 const stateOf = (i: number, current: number) =>
   i < current ? 'done' : i === current ? 'active' : 'upcoming'
 
-/**
- * How a selection was made:
- * - scroll: the node closest to the viewport centre (keeps it in place while panels open/close)
- * - click / key: manual choice; scroll-driven selection pauses until the user scrolls on
- * - jump: phase legend; brings the agent to the centre of the screen
- * - reset: the box was just opened, so the first agent is shown
- */
-type SelectMode = 'scroll' | 'click' | 'key' | 'jump' | 'reset'
-
 /** Scroll distance after a manual choice before scrolling takes over again. */
 const MANUAL_HOLD_PX = 40
+/** A neighbour must be this much closer to the centre before it takes over (prevents flicker). */
+const SWITCH_MARGIN_PX = 8
+
+/**
+ * Scroll-driven selection measures the timeline as if every panel were closed,
+ * so opening/closing panels never changes which agent counts as "at the centre".
+ */
+function collapsedNodeCentres(
+  nodes: (HTMLElement | null)[],
+  reveals: (HTMLElement | null)[]
+): number[] {
+  let openAbove = 0
+  return nodes.map((node, i) => {
+    const r = node?.getBoundingClientRect()
+    const centre = r ? r.top + r.height / 2 - openAbove : Infinity
+    openAbove += reveals[i]?.getBoundingClientRect().height ?? 0
+    return centre
+  })
+}
 
 export function AgentFlow() {
   const [selected, setSelected] = useState(0)
@@ -61,39 +71,40 @@ export function AgentFlow() {
   const track = useRef<HTMLDivElement>(null)
   const buttons = useRef<(HTMLButtonElement | null)[]>([])
   const nodes = useRef<(HTMLSpanElement | null)[]>([])
-  const pending = useRef<{ mode: SelectMode; el: HTMLElement | null; top: number } | null>(null)
+  const reveals = useRef<(HTMLDivElement | null)[]>([])
+  /** Manual choice: scroll position it was made at; scrolling resumes control past MANUAL_HOLD_PX. */
   const holdY = useRef<number | null>(null)
+  /** Programmatic scroll to an agent in progress: auto-selection waits until it lands. */
+  const jump = useRef<{ y: number; until: number } | null>(null)
   const activePhase = flowPhases.findIndex((p) => p.agents.includes(stages[selected].n))
 
-  const applyPending = () => {
-    const p = pending.current
-    pending.current = null
-    if (!p) return
-    const el = p.el
-    if (el && (p.mode === 'scroll' || p.mode === 'click' || p.mode === 'key')) {
-      // Panels above the agent opened or closed: keep the agent where the reader is looking.
-      const drift = el.getBoundingClientRect().top - p.top
-      if (Math.abs(drift) > 0.5) window.scrollTo({ top: window.scrollY + drift, behavior: 'instant' })
-    }
-    if (el && p.mode === 'key') el.scrollIntoView({ block: 'nearest', behavior: 'instant' })
-    if (el && p.mode === 'jump') el.scrollIntoView({ block: 'center', behavior: 'instant' })
-    if (p.mode !== 'scroll') holdY.current = window.scrollY
-  }
-
-  const select = (i: number, mode: SelectMode) => {
+  const setActive = (i: number) => {
     const next = Math.max(0, Math.min(stages.length - 1, i))
-    const el = nodes.current[next]
-    pending.current = { mode, el, top: el?.getBoundingClientRect().top ?? 0 }
-    const changed = next !== selectedRef.current
     selectedRef.current = next
-    if (changed) setSelected(next)
-    else applyPending()
-    if (mode === 'key') buttons.current[next]?.focus({ preventScroll: true })
+    setSelected(next)
+    return next
   }
 
-  useLayoutEffect(() => {
-    applyPending()
-  }, [selected])
+  /** Click / reset: pick an agent and let scrolling take over again once the user scrolls on. */
+  const choose = (i: number) => {
+    setActive(i)
+    jump.current = null
+    holdY.current = window.scrollY
+  }
+
+  /** Legend / keyboard: pick an agent and bring it to the centre of the screen. */
+  const goTo = (i: number, focus = false) => {
+    const next = setActive(i)
+    holdY.current = null
+    const centre = collapsedNodeCentres(nodes.current, reveals.current)[next]
+    if (Number.isFinite(centre)) {
+      const y = Math.round(window.scrollY + centre - window.innerHeight / 2)
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      jump.current = { y, until: performance.now() + 1500 }
+      window.scrollTo({ top: y, behavior: reduced ? 'auto' : 'smooth' })
+    }
+    if (focus) buttons.current[next]?.focus({ preventScroll: true })
+  }
 
   // Scroll-driven selection: the agent closest to the middle of the screen is the active one.
   useEffect(() => {
@@ -103,6 +114,13 @@ export function AgentFlow() {
     const evaluate = () => {
       frame = 0
       if (details && !details.open) return
+      if (jump.current) {
+        const arrived = Math.abs(window.scrollY - jump.current.y) <= 2
+        if (!arrived && performance.now() < jump.current.until) return
+        jump.current = null
+        holdY.current = window.scrollY
+        return
+      }
       if (holdY.current !== null) {
         if (Math.abs(window.scrollY - holdY.current) < MANUAL_HOLD_PX) return
         holdY.current = null
@@ -110,25 +128,23 @@ export function AgentFlow() {
       const box = track.current?.getBoundingClientRect()
       if (!box || box.bottom < 0 || box.top > window.innerHeight) return
       const middle = window.innerHeight / 2
-      let best = -1
-      let bestDistance = Infinity
-      nodes.current.forEach((node, i) => {
-        if (!node) return
-        const r = node.getBoundingClientRect()
-        const distance = Math.abs(r.top + r.height / 2 - middle)
-        if (distance < bestDistance) {
-          bestDistance = distance
-          best = i
-        }
+      const distances = collapsedNodeCentres(nodes.current, reveals.current).map((c) =>
+        Math.abs(c - middle)
+      )
+      let best = selectedRef.current
+      distances.forEach((d, i) => {
+        if (d < distances[best]) best = i
       })
-      if (best >= 0 && best !== selectedRef.current) select(best, 'scroll')
+      if (best !== selectedRef.current && distances[best] + SWITCH_MARGIN_PX < distances[selectedRef.current]) {
+        setActive(best)
+      }
     }
 
     const schedule = () => {
       if (!frame) frame = requestAnimationFrame(evaluate)
     }
     const onToggle = () => {
-      if (details?.open) select(0, 'reset')
+      if (details?.open) choose(0)
     }
 
     window.addEventListener('scroll', schedule, { passive: true })
@@ -140,7 +156,7 @@ export function AgentFlow() {
       window.removeEventListener('resize', schedule)
       details?.removeEventListener('toggle', onToggle)
     }
-    // select only touches refs and state setters, so the first-render version stays valid.
+    // choose/setActive only touch refs and state setters, so the first-render versions stay valid.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -155,7 +171,7 @@ export function AgentFlow() {
     }
     if (e.key in moves) {
       e.preventDefault()
-      select(moves[e.key], 'key')
+      goTo(moves[e.key], true)
     }
   }
 
