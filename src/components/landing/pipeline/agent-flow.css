@@ -1,0 +1,227 @@
+/* Interactive agent flow inside the "Behind the investigation" box. */
+.agent-flow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 28px;
+  margin-top: 24px;
+}
+@media (min-width: 768px) {
+  .agent-flow {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+    align-items: start;
+  }
+}
+
+.agent-flow-stages {
+  list-style: none;
+  position: relative;
+}
+.agent-flow-stage {
+  position: relative;
+  padding-bottom: 18px;
+}
+.agent-flow-stage:last-child {
+  padding-bottom: 0;
+}
+.agent-flow-stage-title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 8px;
+  font:
+    10px ui-monospace,
+    monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: #7aa3b8;
+  transition: color 0.2s;
+}
+.agent-flow-stage-title span {
+  color: #858f9e;
+}
+.agent-flow-stage[data-active='true'] .agent-flow-stage-title {
+  color: #7dd3fc;
+}
+
+.agent-flow-agents {
+  list-style: none;
+  position: relative;
+  margin-left: 13px;
+  border-left: 1px solid #ffffff14;
+}
+.agent-flow-stage[data-active='true'] .agent-flow-agents {
+  border-left-color: #7dd3fc40;
+}
+.agent-flow-agent {
+  position: relative;
+}
+.agent-flow-agent button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin-left: -13px;
+  padding: 6px 8px 6px 0;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  border-radius: 6px;
+}
+.agent-flow-agent button:focus-visible {
+  outline: 1px solid #7dd3fc;
+  outline-offset: 2px;
+}
+.agent-flow-node {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  border: 1px solid #ffffff1f;
+  background: hsl(0 0% 6%);
+  font:
+    10px ui-monospace,
+    monospace;
+  color: #7aa3b8;
+  transition:
+    border-color 0.2s,
+    color 0.2s,
+    background 0.2s,
+    box-shadow 0.2s;
+}
+.agent-flow-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: #c5cdd9;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+.agent-flow-agent button:hover .agent-flow-name {
+  opacity: 0.9;
+}
+.agent-flow-agent button:hover .agent-flow-node {
+  border-color: #7dd3fc60;
+}
+.agent-flow-agent[data-active='true'] .agent-flow-node {
+  border-color: #7dd3fc;
+  color: #c5edff;
+  background: #7dd3fc14;
+  box-shadow: 0 0 0 4px #7dd3fc0d;
+}
+.agent-flow-agent[data-active='true'] .agent-flow-name {
+  opacity: 1;
+  text-decoration: underline;
+  text-decoration-color: #7dd3fc;
+  text-underline-offset: 4px;
+}
+
+/* Detail: inline under the agent on small screens, side panel on larger ones. */
+.agent-flow-inline {
+  padding: 4px 0 10px 26px;
+}
+.agent-flow-aside {
+  display: none;
+}
+@media (min-width: 768px) {
+  .agent-flow-inline {
+    display: none;
+  }
+  .agent-flow-aside {
+    display: block;
+    position: sticky;
+    top: 96px;
+  }
+}
+
+.agent-flow-detail {
+  border-left: 2px solid #7dd3fc;
+  background: #7dd3fc08;
+  padding: 16px 18px;
+  border-radius: 0 8px 8px 0;
+}
+.agent-flow-detail-kicker {
+  font:
+    10px ui-monospace,
+    monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: #7dd3fc;
+}
+.agent-flow-detail-title {
+  margin-top: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #e6ebf2;
+}
+.agent-flow-detail-desc {
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #9aa3b0;
+}
+.agent-flow-detail-chain {
+  margin-top: 10px;
+  font-size: 10px;
+  color: #858f9e;
+}
+.agent-flow-io {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 11px;
+  color: #c5cdd9;
+}
+.agent-flow-io em {
+  font-style: normal;
+  margin-right: 6px;
+  font:
+    9px ui-monospace,
+    monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #7aa3b8;
+}
+.agent-flow-io > span[aria-hidden] {
+  color: #7dd3fc80;
+}
+.agent-flow-evidence {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  margin-top: 14px;
+  background: #ffffff0b;
+  border: 1px solid #ffffff0b;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.agent-flow-evidence > div {
+  background: hsl(0 0% 5%);
+  padding: 8px 10px;
+}
+.agent-flow-evidence dt {
+  font:
+    9px ui-monospace,
+    monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #7aa3b8;
+}
+.agent-flow-evidence dd {
+  margin-top: 3px;
+  font-size: 11px;
+  color: #c5cdd9;
+}
+.agent-flow-detail-link {
+  display: inline-block;
+  margin-top: 12px;
+  font-size: 10px;
+  color: #93bbcf;
+}
+.agent-flow-detail-link:focus-visible {
+  outline: 1px solid #7dd3fc;
+  outline-offset: 4px;
+}
