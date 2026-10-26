@@ -93,7 +93,7 @@ export function ProofSection() {
                   animate={visible ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
                   transition={{ duration: reduced ? 0 : 0.55, ease: EASE }}
                   aria-hidden={!visible}
-                  className="flex items-center justify-between gap-4 border-b border-border py-4"
+                  className="flex items-center justify-between gap-4 border-b border-border py-3"
                 >
                   <span>{label}</span>
                   <span className="flex items-center gap-2 text-sky-200">
@@ -112,7 +112,7 @@ export function ProofSection() {
             })}
           </ul>
 
-          <div className="relative mt-5 h-[92px]" aria-live="polite">
+          <div className="relative mt-5 h-[80px]" aria-live="polite">
             <AnimatePresence mode="wait" initial={false}>
               {decision === 'auto-merge' && (
                 <motion.div
