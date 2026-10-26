@@ -7,7 +7,7 @@ const navItems = [
   { id: 'pipeline', label: 'Walkthrough' },
   { id: 'innovations', label: 'Why ProoFix' },
   { id: 'architecture', label: 'Architecture' },
-  { id: 'trust', label: 'Review package' }
+  { id: 'trust', label: 'Trust Decision' }
 ]
 
 const socialLinks = [
