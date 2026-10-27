@@ -500,7 +500,15 @@
     overflow-wrap: anywhere;
   }
   .aev dd[data-mono] .aev-value {
-    font-size: 10px;
+    font: inherit;
+  }
+  .aev[data-kind='terminal'] .aev-label::before,
+  .aev[data-kind='pytest'] .aev-label::before {
+    content: none;
+  }
+  .aev[data-kind='graph'] .aev-lead,
+  .aev-gutter {
+    display: none;
   }
   .aev-chip {
     white-space: normal;
