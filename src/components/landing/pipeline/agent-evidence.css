@@ -506,9 +506,16 @@
   .aev[data-kind='pytest'] .aev-label::before {
     content: none;
   }
-  .aev[data-kind='graph'] .aev-lead,
-  .aev-gutter {
-    display: none;
+  .aev-lead {
+    display: none !important;
+  }
+  .aev-chip {
+    padding: 0 3px;
+    line-height: 13px;
+  }
+  .aev-chips {
+    gap: 2px;
+    margin-right: 2px;
   }
   .aev-chip {
     white-space: normal;
