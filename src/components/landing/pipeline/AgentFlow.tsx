@@ -1,5 +1,6 @@
 import { Fragment, useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { stages } from './stageData'
+import { AgentEvidence } from './AgentEvidence'
 import './agent-flow.css'
 
 type Phase = { title: string; agents: string[] }
@@ -281,14 +282,7 @@ export function AgentFlow() {
                                 {stage.output}
                               </span>
                             </p>
-                            <dl className="aflow-evidence">
-                              {stage.evidence.map((ev) => (
-                                <div key={ev.label}>
-                                  <dt>{ev.label}</dt>
-                                  <dd>{ev.value}</dd>
-                                </div>
-                              ))}
-                            </dl>
+                            <AgentEvidence n={n} evidence={stage.evidence} />
                             <a className="aflow-link" href={`#moment-${moment}`}>
                               View {momentTitles[moment - 1].toLowerCase()} ↗
                             </a>
