@@ -226,15 +226,15 @@ const variants: Record<string, Variant> = {
     cells: () => [
       { mark: <Meter lit={3} tone="warn" />, tone: 'warn', focus: true },
       { lead: <span className="aev-gutter">L·</span>, mono: true },
-      { mark: <Chip tone="muted">baseline</Chip> },
-      { lead: <Glyph tone="pending">→</Glyph>, tone: 'pending' }
+      { value: <Chip tone="muted">no — baseline</Chip> },
+      { lead: <Glyph tone="pending">⇢</Glyph>, tone: 'pending' }
     ]
   },
   // Failure Reproduction — pytest output.
   '06': {
     kind: 'pytest',
     cells: (ev) => [
-      { mark: <Chip tone="fail">fail</Chip>, lead: <Glyph tone="muted">▸</Glyph>, mono: true },
+      { mark: <Chip tone="fail">fail</Chip>, mono: true },
       { mark: <Glyph tone="muted">==</Glyph>, mono: true, tone: 'ok' },
       { mark: <Glyph tone="fail">≠</Glyph>, mono: true, tone: 'fail' },
       { lead: <Glyph tone="fail">✕</Glyph>, tone: 'fail', focus: true, value: ev[3].value }
@@ -330,7 +330,7 @@ const variants: Record<string, Variant> = {
       { lead: <Glyph tone="ok">✓</Glyph>, tone: 'ok' },
       { lead: <Glyph tone="ok">✓</Glyph>, tone: 'ok' },
       { lead: <Glyph tone="warn">⚠</Glyph>, tone: 'warn' },
-      { lead: <Glyph tone="info">◎</Glyph>, value: <Chip dashed>human review</Chip>, focus: true }
+      { value: <Chip dashed>→ human review</Chip>, focus: true }
     ]
   }
 }

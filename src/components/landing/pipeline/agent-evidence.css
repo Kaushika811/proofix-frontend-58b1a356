@@ -464,6 +464,40 @@
   }
 }
 
+/* The full test id is long; keep it on one line inside the card. */
+.aev[data-kind='pytest'] .aev-cell:first-child .aev-value {
+  font-size: 9.5px;
+}
+
+/* Narrow screens: cards are too slim for one-line values, so text wraps as before. */
+@media (max-width: 767px) {
+  .aev .aev-cell {
+    height: auto;
+    min-height: 48px;
+  }
+  .aev dt {
+    height: auto;
+    min-height: 13px;
+    align-items: flex-start;
+  }
+  .aev dd {
+    height: auto;
+    min-height: 18px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    row-gap: 3px;
+  }
+  .aev-label,
+  .aev-value {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .aev-mark,
+  .aev-lead {
+    margin-top: 1px;
+  }
+}
+
 /* Right-aligned (left-side) cards on larger screens keep their content left-aligned inside each card. */
 @media (min-width: 768px) {
   .aflow-row[data-side='left'] .aev .aev-cell {
