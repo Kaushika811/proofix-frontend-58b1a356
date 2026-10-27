@@ -12,3 +12,4 @@
 ## Project rules
 - App code in `src/` and `Landing/` was imported unchanged from github.com/Kaushika811/proofix-frontend (`frontend/`); keep it faithful to that repo unless the user asks for changes.
 - `vite.config.ts` stays on `@lovable.dev/vite-tanstack-config` (the repo's plain Vite config with a backend proxy is not used) so the Lovable preview can run it.
+- Agent evidence cards in the architecture timeline render through `pipeline/AgentEvidence.tsx` (one visual variant per agent number, data still from `stageData.ts`) and keep a fixed card height so opening an agent never shifts the timeline.
